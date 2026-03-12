@@ -29,6 +29,10 @@ import brandRoutes from './modules/brands/brand.routes';
 import unitRoutes from './modules/units/unit.routes';
 import variationRoutes from './modules/variations/variation.routes';
 
+import stockRoutes      from './modules/stock/stock.routes';
+import warehouseRoutes  from './modules/warehouses/warehouse.routes';
+// import saleRoutes       from './modules/sales/sale.routes';
+
 // Phase 2+ routes will be imported and mounted here as they are built
 // import productRoutes   from './modules/products/product.routes';
 // import categoryRoutes  from './modules/categories/category.routes';
@@ -205,6 +209,9 @@ function createApp(): Application {
   app.use(`/api/${V}/brands`, brandRoutes);
   app.use(`/api/${V}/units`, unitRoutes);
   app.use(`/api/${V}/variations`, variationRoutes);
+  app.use(`/api/${V}/stock`,       stockRoutes);
+  app.use(`/api/${V}/warehouses`,  warehouseRoutes);
+//   app.use(`/api/${V}/sales`,       saleRoutes);
 
   // Phase 2+ routes mounted here
   // app.use(`/api/${V}/products`,   productRoutes);
