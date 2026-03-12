@@ -143,7 +143,7 @@ function createApp(): Application {
     res.status(200).json({
       success: true,
       status: "healthy",
-      service: "ebeano-inventory-api",
+      service: "trackstock-inventory-api",
       version: "1.0.0",
       env: env.NODE_ENV,
       timestamp: new Date().toISOString(),
@@ -155,7 +155,7 @@ function createApp(): Application {
     res.status(200).json({
       success: true,
       status: "healthy",
-      service: "ebeano-inventory-api",
+      service: "trackstock-inventory-api",
       version: "1.0.0",
       env: env.NODE_ENV,
       timestamp: new Date().toISOString(),
@@ -165,7 +165,7 @@ function createApp(): Application {
 
   // ── Swagger Documentation ──────────────────────────────────────────────────
   const swaggerOptions: swaggerUi.SwaggerUiOptions = {
-    customSiteTitle: "Ebeano API Docs",
+    customSiteTitle: "trackstock API Docs",
     customfavIcon: "/favicon.ico",
     swaggerOptions: {
       persistAuthorization: true,
@@ -232,7 +232,7 @@ function createApp(): Application {
   app.get(`/api/${V}`, (_req: Request, res: Response) => {
     res.json({
       success: true,
-      name: "Ebeano Inventory Management API",
+      name: "trackstock Inventory Management API",
       version: "1.0.0",
       docs: `${env.API_BASE_URL}/api/${V}/docs`,
       health: `${env.API_BASE_URL}/api/${V}/health`,
