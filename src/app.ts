@@ -1,21 +1,33 @@
-import express, { Application, Request, Response } from 'express';
-import helmet from 'helmet';
-import cors from 'cors';
-import compression from 'compression';
-import cookieParser from 'cookie-parser';
-import mongoSanitize from 'express-mongo-sanitize';
-import hpp from 'hpp';
-import swaggerUi from 'swagger-ui-express';
+import express, { Application, Request, Response } from "express";
+import helmet from "helmet";
+import cors from "cors";
+import compression from "compression";
+import cookieParser from "cookie-parser";
+import mongoSanitize from "express-mongo-sanitize";
+import hpp from "hpp";
+import swaggerUi from "swagger-ui-express";
 
-import env from './config/env';
-import swaggerSpec from './config/swagger';
-import { httpLogger, requestId, responseTime } from './shared/middleware/logger.middleware';
-import { globalRateLimiter } from './shared/middleware/rateLimiter.middleware';
-import { globalErrorHandler, notFoundHandler } from './shared/middleware/error.middleware';
+import env from "./config/env";
+import swaggerSpec from "./config/swagger";
+import {
+  httpLogger,
+  requestId,
+  responseTime,
+} from "./shared/middleware/logger.middleware";
+import { globalRateLimiter } from "./shared/middleware/rateLimiter.middleware";
+import {
+  globalErrorHandler,
+  notFoundHandler,
+} from "./shared/middleware/error.middleware";
 
 // ── Route imports ─────────────────────────────────────────────────────────────
-import authRoutes    from './modules/auth/auth.routes';
-import userRoutes    from './modules/users/user.routes';
+import authRoutes from './modules/auth/auth.routes';
+import userRoutes from './modules/users/user.routes';
+import productRoutes from './modules/products/product.routes';
+import categoryRoutes from './modules/categories/category.routes';
+import brandRoutes from './modules/brands/brand.routes';
+import unitRoutes from './modules/units/unit.routes';
+import variationRoutes from './modules/variations/variation.routes';
 
 // Phase 2+ routes will be imported and mounted here as they are built
 // import productRoutes   from './modules/products/product.routes';
@@ -26,64 +38,86 @@ function createApp(): Application {
   const app = express();
 
   // ── Trust proxy (for accurate IP behind load balancer) ────────────────────
-  app.set('trust proxy', 1);
+  app.set("trust proxy", 1);
 
   // ── Security headers (Helmet) ─────────────────────────────────────────────
-  app.use(helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc:   ["'self'", "'unsafe-inline'"],
-        scriptSrc:  ["'self'"],
-        imgSrc:     ["'self'", 'data:', 'https:'],
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: ["'self'"],
+          imgSrc: ["'self'", "data:", "https:"],
+        },
       },
-    },
-    crossOriginEmbedderPolicy: false, // Swagger UI needs this
-    referrerPolicy: { policy: 'same-origin' },
-  }));
+      crossOriginEmbedderPolicy: false, // Swagger UI needs this
+      referrerPolicy: { policy: "same-origin" },
+    }),
+  );
 
   // ── CORS ──────────────────────────────────────────────────────────────────
-  app.use(cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl, Postman)
-      if (!origin) return callback(null, true);
-      if (env.CORS_ORIGINS.includes(origin) || env.NODE_ENV === 'development') {
-        return callback(null, true);
-      }
-      return callback(new Error(`CORS: Origin ${origin} not allowed`));
-    },
-    methods:          ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders:   ['Content-Type', 'Authorization', 'X-Request-ID', 'X-API-Key'],
-    exposedHeaders:   ['X-Request-ID', 'X-Response-Time', 'X-RateLimit-Remaining'],
-    credentials:      true,
-    maxAge:           86400, // 24h preflight cache
-  }));
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, Postman)
+        if (!origin) return callback(null, true);
+        if (
+          env.CORS_ORIGINS.includes(origin) ||
+          env.NODE_ENV === "development"
+        ) {
+          return callback(null, true);
+        }
+        return callback(new Error(`CORS: Origin ${origin} not allowed`));
+      },
+      methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+      allowedHeaders: [
+        "Content-Type",
+        "Authorization",
+        "X-Request-ID",
+        "X-API-Key",
+      ],
+      exposedHeaders: [
+        "X-Request-ID",
+        "X-Response-Time",
+        "X-RateLimit-Remaining",
+      ],
+      credentials: true,
+      maxAge: 86400, // 24h preflight cache
+    }),
+  );
 
   // ── Compression ───────────────────────────────────────────────────────────
-  app.use(compression({
-    filter: (req, res) => {
-      if (req.headers['x-no-compression']) return false;
-      return compression.filter(req, res);
-    },
-    level: 6,
-  }));
+  app.use(
+    compression({
+      filter: (req, res) => {
+        if (req.headers["x-no-compression"]) return false;
+        return compression.filter(req, res);
+      },
+      level: 6,
+    }),
+  );
 
   // ── Body parsers ──────────────────────────────────────────────────────────
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
   app.use(cookieParser(env.COOKIE_SECRET));
 
   // ── Security middleware ────────────────────────────────────────────────────
-  app.use(mongoSanitize({
-    replaceWith: '_',
-    onSanitize: ({ key }) => {
-      console.warn(`Sanitized key: ${key}`);
-    },
-  }));
+  app.use(
+    mongoSanitize({
+      replaceWith: "_",
+      onSanitize: ({ key }) => {
+        console.warn(`Sanitized key: ${key}`);
+      },
+    }),
+  );
 
-  app.use(hpp({
-    whitelist: ['tags', 'categories', 'status', 'ids'],
-  }));
+  app.use(
+    hpp({
+      whitelist: ["tags", "categories", "status", "ids"],
+    }),
+  );
 
   // ── Request middleware ─────────────────────────────────────────────────────
   app.use(requestId);
@@ -105,34 +139,34 @@ function createApp(): Application {
    *       200:
    *         description: API is healthy
    */
-  app.get('/health', (_req: Request, res: Response) => {
+  app.get("/health", (_req: Request, res: Response) => {
     res.status(200).json({
-      success:   true,
-      status:    'healthy',
-      service:   'ebeano-inventory-api',
-      version:   '1.0.0',
-      env:       env.NODE_ENV,
+      success: true,
+      status: "healthy",
+      service: "ebeano-inventory-api",
+      version: "1.0.0",
+      env: env.NODE_ENV,
       timestamp: new Date().toISOString(),
-      uptime:    `${Math.floor(process.uptime())}s`,
+      uptime: `${Math.floor(process.uptime())}s`,
     });
   });
 
   app.get(`/api/${env.API_VERSION}/health`, (_req: Request, res: Response) => {
     res.status(200).json({
-      success:   true,
-      status:    'healthy',
-      service:   'ebeano-inventory-api',
-      version:   '1.0.0',
-      env:       env.NODE_ENV,
+      success: true,
+      status: "healthy",
+      service: "ebeano-inventory-api",
+      version: "1.0.0",
+      env: env.NODE_ENV,
       timestamp: new Date().toISOString(),
-      uptime:    `${Math.floor(process.uptime())}s`,
+      uptime: `${Math.floor(process.uptime())}s`,
     });
   });
 
   // ── Swagger Documentation ──────────────────────────────────────────────────
   const swaggerOptions: swaggerUi.SwaggerUiOptions = {
-    customSiteTitle: 'Ebeano API Docs',
-    customfavIcon:   '/favicon.ico',
+    customSiteTitle: "Ebeano API Docs",
+    customfavIcon: "/favicon.ico",
     swaggerOptions: {
       persistAuthorization: true,
       displayRequestDuration: true,
@@ -148,21 +182,29 @@ function createApp(): Application {
   app.use(
     `/api/${env.API_VERSION}/docs`,
     swaggerUi.serve,
-    swaggerUi.setup(swaggerSpec, swaggerOptions)
+    swaggerUi.setup(swaggerSpec, swaggerOptions),
   );
 
   // Expose raw swagger JSON
-  app.get(`/api/${env.API_VERSION}/docs.json`, (_req: Request, res: Response) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(swaggerSpec);
-  });
+  app.get(
+    `/api/${env.API_VERSION}/docs.json`,
+    (_req: Request, res: Response) => {
+      res.setHeader("Content-Type", "application/json");
+      res.send(swaggerSpec);
+    },
+  );
 
   // ── API Routes ─────────────────────────────────────────────────────────────
   const apiRouter = express.Router();
   const V = env.API_VERSION;
 
-  app.use(`/api/${V}/auth`,  authRoutes);
+  app.use(`/api/${V}/auth`, authRoutes);
   app.use(`/api/${V}/users`, userRoutes);
+  app.use(`/api/${V}/products`, productRoutes);
+  app.use(`/api/${V}/categories`, categoryRoutes);
+  app.use(`/api/${V}/brands`, brandRoutes);
+  app.use(`/api/${V}/units`, unitRoutes);
+  app.use(`/api/${V}/variations`, variationRoutes);
 
   // Phase 2+ routes mounted here
   // app.use(`/api/${V}/products`,   productRoutes);
@@ -190,30 +232,30 @@ function createApp(): Application {
   app.get(`/api/${V}`, (_req: Request, res: Response) => {
     res.json({
       success: true,
-      name:    'Ebeano Inventory Management API',
-      version: '1.0.0',
-      docs:    `${env.API_BASE_URL}/api/${V}/docs`,
-      health:  `${env.API_BASE_URL}/api/${V}/health`,
+      name: "Ebeano Inventory Management API",
+      version: "1.0.0",
+      docs: `${env.API_BASE_URL}/api/${V}/docs`,
+      health: `${env.API_BASE_URL}/api/${V}/health`,
       endpoints: {
-        auth:          `/api/${V}/auth`,
-        users:         `/api/${V}/users`,
-        products:      `/api/${V}/products`,
-        categories:    `/api/${V}/categories`,
-        stock:         `/api/${V}/stock`,
-        sales:         `/api/${V}/sales`,
-        purchases:     `/api/${V}/purchases`,
-        hotel:         `/api/${V}/hotel`,
-        staff:         `/api/${V}/staff`,
-        assets:        `/api/${V}/assets`,
-        expenses:      `/api/${V}/expenses`,
-        suppliers:     `/api/${V}/suppliers`,
-        warehouses:    `/api/${V}/warehouses`,
-        roles:         `/api/${V}/roles`,
-        currencies:    `/api/${V}/currencies`,
-        settings:      `/api/${V}/settings`,
-        reports:       `/api/${V}/reports`,
-        payments:      `/api/${V}/payments`,
-        media:         `/api/${V}/media`,
+        auth: `/api/${V}/auth`,
+        users: `/api/${V}/users`,
+        products: `/api/${V}/products`,
+        categories: `/api/${V}/categories`,
+        stock: `/api/${V}/stock`,
+        sales: `/api/${V}/sales`,
+        purchases: `/api/${V}/purchases`,
+        hotel: `/api/${V}/hotel`,
+        staff: `/api/${V}/staff`,
+        assets: `/api/${V}/assets`,
+        expenses: `/api/${V}/expenses`,
+        suppliers: `/api/${V}/suppliers`,
+        warehouses: `/api/${V}/warehouses`,
+        roles: `/api/${V}/roles`,
+        currencies: `/api/${V}/currencies`,
+        settings: `/api/${V}/settings`,
+        reports: `/api/${V}/reports`,
+        payments: `/api/${V}/payments`,
+        media: `/api/${V}/media`,
         notifications: `/api/${V}/notifications`,
       },
     });
