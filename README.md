@@ -261,6 +261,9 @@ Run `npm run seed` to populate:
 | hotel_staff | hotel@TrackStock.com | Hotel@123 |
 | accountant | accounts@TrackStock.com | Accounts@123 |
 
+Seed credentials
+RoleEmailPasswordsuper_admin247okolo@gmail.comspotenugu123managermanager@trackstock.comManager@123cashiercashier@trackstock.comCashier@123warehouse_staffwarehouse@trackstock.comWarehouse@123hotel_staffhotel@trackstock.comHotel@123accountantaccounts@trackstock.comAccounts@123
+
 ### Other Seed Data
 - **3 warehouses** — Main Store (MAIN), Warehouse B (WHB), Abuja Branch (ABJ)
 - **5 customers** — Emeka Okafor, Fatima Abdullahi, Chidinma Stores, Bello Traders, Ngozi Eze
