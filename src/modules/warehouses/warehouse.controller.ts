@@ -25,7 +25,7 @@ export async function getWarehouseById(
 ): Promise<void> {
   try {
     const wh = await warehouseService.getWarehouseById(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, {
@@ -82,7 +82,7 @@ export async function updateWarehouse(
 ): Promise<void> {
   try {
     const wh = await warehouseService.updateWarehouse(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
     );
@@ -102,7 +102,7 @@ export async function setDefaultWarehouse(
 ): Promise<void> {
   try {
     const wh = await warehouseService.setDefault(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, {
@@ -121,7 +121,7 @@ export async function deleteWarehouse(
 ): Promise<void> {
   try {
     await warehouseService.deleteWarehouse(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.noContent(res);

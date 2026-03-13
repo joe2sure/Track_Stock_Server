@@ -11,7 +11,7 @@ export async function getSuppliers(req: Request, res: Response, next: NextFuncti
 
 export async function getSupplierById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const supplier = await supplierService.getSupplierById(req.params.id, req.user?.tenantId ?? 'default');
+    const supplier = await supplierService.getSupplierById(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Supplier retrieved', data: { supplier } });
   } catch (e) { next(e); }
 }
@@ -32,14 +32,14 @@ export async function createSupplier(req: Request, res: Response, next: NextFunc
 
 export async function updateSupplier(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const supplier = await supplierService.updateSupplier(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const supplier = await supplierService.updateSupplier(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Supplier updated', data: { supplier } });
   } catch (e) { next(e); }
 }
 
 export async function deleteSupplier(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    await supplierService.deleteSupplier(req.params.id, req.user?.tenantId ?? 'default');
+    await supplierService.deleteSupplier(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.noContent(res);
   } catch (e) { next(e); }
 }

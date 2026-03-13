@@ -18,7 +18,7 @@ export async function getStockLevels(req: Request, res: Response, next: NextFunc
 
 export async function getProductStock(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const levels = await stockService.getProductStock(req.params.productId, req.user?.tenantId ?? 'default');
+    const levels = await stockService.getProductStock(req.params.productId as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Product stock', data: { levels } });
   } catch (e) { next(e); }
 }
@@ -67,7 +67,7 @@ export async function getTransfers(req: Request, res: Response, next: NextFuncti
 
 export async function getTransferById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const t = await stockService.getTransferById(req.params.id, req.user?.tenantId ?? 'default');
+    const t = await stockService.getTransferById(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Transfer retrieved', data: { transfer: t } });
   } catch (e) { next(e); }
 }
@@ -81,35 +81,35 @@ export async function createTransfer(req: Request, res: Response, next: NextFunc
 
 export async function approveTransfer(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const t = await stockService.approveTransfer(req.params.id, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const t = await stockService.approveTransfer(req.params.id as string, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Transfer approved', data: { transfer: t } });
   } catch (e) { next(e); }
 }
 
 export async function rejectTransfer(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const t = await stockService.rejectTransfer(req.params.id, req.body.reason, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const t = await stockService.rejectTransfer(req.params.id as string, req.body.reason, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Transfer rejected', data: { transfer: t } });
   } catch (e) { next(e); }
 }
 
 export async function dispatchTransfer(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const t = await stockService.dispatchTransfer(req.params.id, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const t = await stockService.dispatchTransfer(req.params.id as string, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Dispatched — stock deducted from source', data: { transfer: t } });
   } catch (e) { next(e); }
 }
 
 export async function receiveTransfer(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const t = await stockService.receiveTransfer(req.params.id, req.body.items, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const t = await stockService.receiveTransfer(req.params.id as string, req.body.items, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Stock received at destination', data: { transfer: t } });
   } catch (e) { next(e); }
 }
 
 export async function cancelTransfer(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const t = await stockService.cancelTransfer(req.params.id, req.body.reason, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const t = await stockService.cancelTransfer(req.params.id as string, req.body.reason, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Transfer cancelled', data: { transfer: t } });
   } catch (e) { next(e); }
 }

@@ -56,7 +56,7 @@ export async function getUserById(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const user = await userService.getUserById(req.params.id);
+    const user = await userService.getUserById(req.params.id as string);
     respond.success(res, { message: "User retrieved", data: { user } });
   } catch (error) {
     next(error);
@@ -103,7 +103,7 @@ export async function updateUser(
 ): Promise<void> {
   try {
     const user = await userService.updateUser(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.userId ?? "",
       req.user?.role ?? "",
@@ -131,7 +131,7 @@ export async function updateUserRole(
 ): Promise<void> {
   try {
     const user = await userService.updateUserRole(
-      req.params.id,
+      req.params.id as string,
       req.body.role,
       req.user?.userId ?? "",
     );
@@ -155,7 +155,7 @@ export async function toggleUserStatus(
 ): Promise<void> {
   try {
     const user = await userService.toggleUserStatus(
-      req.params.id,
+      req.params.id as string,
       req.user?.userId ?? "",
     );
     respond.success(res, {
@@ -180,7 +180,7 @@ export async function deleteUser(
   next: NextFunction,
 ): Promise<void> {
   try {
-    await userService.deleteUser(req.params.id, req.user?.userId ?? "");
+    await userService.deleteUser(req.params.id as string, req.user?.userId ?? "");
     respond.noContent(res);
   } catch (error) {
     next(error);

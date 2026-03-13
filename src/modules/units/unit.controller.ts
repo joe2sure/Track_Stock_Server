@@ -43,7 +43,7 @@ export async function getUnitById(
 ): Promise<void> {
   try {
     const unit = await unitService.getUnitById(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "Unit retrieved", data: { unit } });
@@ -76,7 +76,7 @@ export async function updateUnit(
 ): Promise<void> {
   try {
     const unit = await unitService.updateUnit(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
     );
@@ -93,7 +93,7 @@ export async function deleteUnit(
 ): Promise<void> {
   try {
     await unitService.deleteUnit(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.noContent(res);

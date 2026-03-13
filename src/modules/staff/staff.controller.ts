@@ -11,7 +11,7 @@ export async function getStaff(req: Request, res: Response, next: NextFunction):
 
 export async function getStaffById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const staff = await staffService.getStaffById(req.params.id, req.user?.tenantId ?? 'default');
+    const staff = await staffService.getStaffById(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Staff member retrieved', data: { staff } });
   } catch (e) { next(e); }
 }
@@ -39,14 +39,14 @@ export async function createStaff(req: Request, res: Response, next: NextFunctio
 
 export async function updateStaff(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const staff = await staffService.updateStaff(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const staff = await staffService.updateStaff(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Staff member updated', data: { staff } });
   } catch (e) { next(e); }
 }
 
 export async function terminateStaff(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const staff = await staffService.terminateStaff(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const staff = await staffService.terminateStaff(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Staff member terminated', data: { staff } });
   } catch (e) { next(e); }
 }
@@ -61,14 +61,14 @@ export async function getAttendance(req: Request, res: Response, next: NextFunct
 
 export async function clockIn(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const rec = await staffService.clockIn(req.params.staffId, req.body, req.user?.tenantId ?? 'default');
+    const rec = await staffService.clockIn(req.params.staffId as string, req.body, req.user?.tenantId ?? 'default');
     respond.created(res, { message: 'Clocked in successfully', data: { attendance: rec } });
   } catch (e) { next(e); }
 }
 
 export async function clockOut(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const rec = await staffService.clockOut(req.params.staffId, req.params.attendanceId, req.body, req.user?.tenantId ?? 'default');
+    const rec = await staffService.clockOut(req.params.staffId as string, req.params.attendanceId as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Clocked out successfully', data: { attendance: rec } });
   } catch (e) { next(e); }
 }
@@ -101,7 +101,7 @@ export async function getLeaveRequests(req: Request, res: Response, next: NextFu
 
 export async function applyForLeave(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const req2 = await staffService.applyForLeave(req.params.staffId, req.body, req.user?.tenantId ?? 'default');
+    const req2 = await staffService.applyForLeave(req.params.staffId as string, req.body, req.user?.tenantId ?? 'default');
     respond.created(res, { message: 'Leave request submitted', data: { leaveRequest: req2 } });
   } catch (e) { next(e); }
 }
@@ -109,7 +109,7 @@ export async function applyForLeave(req: Request, res: Response, next: NextFunct
 export async function reviewLeave(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { action, reviewNotes } = req.body;
-    const leaveRequest = await staffService.reviewLeave(req.params.id, action, reviewNotes, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const leaveRequest = await staffService.reviewLeave(req.params.id as string, action, reviewNotes, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: `Leave request ${action}d`, data: { leaveRequest } });
   } catch (e) { next(e); }
 }

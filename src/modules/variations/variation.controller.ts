@@ -25,7 +25,7 @@ export async function getVariationById(
 ): Promise<void> {
   try {
     const v = await variationService.getVariationById(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, {
@@ -64,7 +64,7 @@ export async function updateVariation(
 ): Promise<void> {
   try {
     const v = await variationService.updateVariation(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
     );
@@ -84,7 +84,7 @@ export async function deleteVariation(
 ): Promise<void> {
   try {
     await variationService.deleteVariation(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.noContent(res);
@@ -100,7 +100,7 @@ export async function addOption(
 ): Promise<void> {
   try {
     const v = await variationService.addOption(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
     );
@@ -117,8 +117,8 @@ export async function updateOption(
 ): Promise<void> {
   try {
     const v = await variationService.updateOption(
-      req.params.id,
-      req.params.optionId,
+      req.params.id as string,
+      req.params.optionId as string,
       req.body,
       req.user?.tenantId ?? "default",
     );
@@ -135,8 +135,8 @@ export async function deleteOption(
 ): Promise<void> {
   try {
     const v = await variationService.deleteOption(
-      req.params.id,
-      req.params.optionId,
+      req.params.id as string,
+      req.params.optionId as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "Option deleted", data: { variation: v } });
@@ -152,7 +152,7 @@ export async function reorderOptions(
 ): Promise<void> {
   try {
     const v = await variationService.reorderOptions(
-      req.params.id,
+      req.params.id as string,
       req.body.order,
       req.user?.tenantId ?? "default",
     );
