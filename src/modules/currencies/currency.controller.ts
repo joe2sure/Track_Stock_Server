@@ -30,7 +30,7 @@ export async function updateExchangeRates(req: Request, res: Response, next: Nex
 
 export async function toggleCurrency(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const currency = await currencyService.toggleCurrency(req.params.id, req.user?.tenantId ?? 'default');
+    const currency = await currencyService.toggleCurrency(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: `Currency ${currency.isActive ? 'activated' : 'deactivated'}`, data: { currency } });
   } catch (e) { next(e); }
 }

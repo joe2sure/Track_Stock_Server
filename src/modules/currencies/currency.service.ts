@@ -1,5 +1,5 @@
 import Currency, { ICurrency } from './currency.model';
-import Settings from '../settings/settings.model';
+// import Settings from '../settings/settings.model';
 import { NotFoundError, BadRequestError, ConflictError } from '../../shared/utils/errors';
 import { getOrSet, deleteCache, CachePrefix } from '../../shared/utils/cache';
 

@@ -18,7 +18,7 @@ export async function getPermissionRegistry(req: Request, res: Response, next: N
 
 export async function getRoleById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const role = await roleService.getRoleById(req.params.id, req.user?.tenantId ?? 'default');
+    const role = await roleService.getRoleById(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Role retrieved', data: { role } });
   } catch (e) { next(e); }
 }
@@ -32,14 +32,14 @@ export async function createRole(req: Request, res: Response, next: NextFunction
 
 export async function updateRole(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const role = await roleService.updateRole(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const role = await roleService.updateRole(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Role updated', data: { role } });
   } catch (e) { next(e); }
 }
 
 export async function deleteRole(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    await roleService.deleteRole(req.params.id, req.user?.tenantId ?? 'default');
+    await roleService.deleteRole(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.noContent(res);
   } catch (e) { next(e); }
 }
@@ -47,7 +47,7 @@ export async function deleteRole(req: Request, res: Response, next: NextFunction
 export async function cloneRole(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const role = await roleService.cloneRole(
-      req.params.id, req.body.newName,
+      req.params.id as string, req.body.newName,
       req.user?.tenantId ?? 'default', req.user?.userId ?? ''
     );
     respond.created(res, { message: 'Role cloned', data: { role } });

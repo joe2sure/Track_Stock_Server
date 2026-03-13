@@ -27,14 +27,14 @@ export async function createRoomType(req: Request, res: Response, next: NextFunc
 
 export async function updateRoomType(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const rt = await hotelService.updateRoomType(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const rt = await hotelService.updateRoomType(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Room type updated', data: { roomType: rt } });
   } catch (e) { next(e); }
 }
 
 export async function deleteRoomType(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    await hotelService.deleteRoomType(req.params.id, req.user?.tenantId ?? 'default');
+    await hotelService.deleteRoomType(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.noContent(res);
   } catch (e) { next(e); }
 }
@@ -49,7 +49,7 @@ export async function getRooms(req: Request, res: Response, next: NextFunction):
 
 export async function getRoomById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const room = await hotelService.getRoomById(req.params.id, req.user?.tenantId ?? 'default');
+    const room = await hotelService.getRoomById(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Room retrieved', data: { room } });
   } catch (e) { next(e); }
 }
@@ -75,7 +75,7 @@ export async function createRoom(req: Request, res: Response, next: NextFunction
 
 export async function updateRoomStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const room = await hotelService.updateRoomStatus(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const room = await hotelService.updateRoomStatus(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Room status updated', data: { room } });
   } catch (e) { next(e); }
 }
@@ -90,7 +90,7 @@ export async function getBookings(req: Request, res: Response, next: NextFunctio
 
 export async function getBookingById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const booking = await hotelService.getBookingById(req.params.id, req.user?.tenantId ?? 'default');
+    const booking = await hotelService.getBookingById(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Booking retrieved', data: { booking } });
   } catch (e) { next(e); }
 }
@@ -104,28 +104,28 @@ export async function createBooking(req: Request, res: Response, next: NextFunct
 
 export async function checkIn(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const booking = await hotelService.checkIn(req.params.id, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const booking = await hotelService.checkIn(req.params.id as string, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Guest checked in successfully', data: { booking } });
   } catch (e) { next(e); }
 }
 
 export async function checkOut(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const booking = await hotelService.checkOut(req.params.id, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const booking = await hotelService.checkOut(req.params.id as string, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Guest checked out successfully', data: { booking } });
   } catch (e) { next(e); }
 }
 
 export async function cancelBooking(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const booking = await hotelService.cancelBooking(req.params.id, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const booking = await hotelService.cancelBooking(req.params.id as string, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Booking cancelled', data: { booking } });
   } catch (e) { next(e); }
 }
 
 export async function extendStay(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const booking = await hotelService.extendStay(req.params.id, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const booking = await hotelService.extendStay(req.params.id as string, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Stay extended', data: { booking } });
   } catch (e) { next(e); }
 }
@@ -133,21 +133,21 @@ export async function extendStay(req: Request, res: Response, next: NextFunction
 // ── Folio ─────────────────────────────────────────────────────────────────────
 export async function addFolioCharge(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const booking = await hotelService.addFolioCharge(req.params.id, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const booking = await hotelService.addFolioCharge(req.params.id as string, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Charge posted to folio', data: { booking } });
   } catch (e) { next(e); }
 }
 
 export async function voidFolioCharge(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const booking = await hotelService.voidFolioCharge(req.params.id, req.params.chargeId, req.user?.tenantId ?? 'default');
+    const booking = await hotelService.voidFolioCharge(req.params.id as string, req.params.chargeId as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Folio charge voided', data: { booking } });
   } catch (e) { next(e); }
 }
 
 export async function addFolioPayment(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const booking = await hotelService.addFolioPayment(req.params.id, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const booking = await hotelService.addFolioPayment(req.params.id as string, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Payment posted to folio', data: { booking } });
   } catch (e) { next(e); }
 }
@@ -169,14 +169,14 @@ export async function createHKTask(req: Request, res: Response, next: NextFuncti
 
 export async function updateHKTask(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const task = await hotelService.updateHKTask(req.params.id, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const task = await hotelService.updateHKTask(req.params.id as string, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Task updated', data: { task } });
   } catch (e) { next(e); }
 }
 
 export async function assignHKTask(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const task = await hotelService.assignHKTask(req.params.id, req.body.assignedTo, req.user?.tenantId ?? 'default');
+    const task = await hotelService.assignHKTask(req.params.id as string, req.body.assignedTo, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Task assigned', data: { task } });
   } catch (e) { next(e); }
 }

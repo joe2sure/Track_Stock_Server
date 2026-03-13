@@ -17,7 +17,7 @@ export async function uploadProductImages(req: Request, res: Response, next: Nex
     if (!files?.length) throw new BadRequestError('No files uploaded');
 
     const tenantId = req.user?.tenantId ?? 'default';
-    const results  = await mediaService.uploadMultiple(files, 'product', tenantId, req.params.id);
+    const results  = await mediaService.uploadMultiple(files, 'product', tenantId, req.params.id as string);
 
     // Append URLs to product gallery
     const urls = results.map(r => r.secureUrl);
@@ -53,7 +53,7 @@ export async function uploadStaffPhoto(req: Request, res: Response, next: NextFu
 
     const tenantId = req.user?.tenantId ?? 'default';
     const result   = await mediaService.uploadImage(file, 'staff', tenantId, {
-      entityId: req.params.id,
+      entityId: req.params.id as string,
       resize:   { width: 400, height: 400, crop: 'fill' },
     });
 
@@ -70,7 +70,7 @@ export async function uploadAssetImages(req: Request, res: Response, next: NextF
     if (!files?.length) throw new BadRequestError('No files uploaded');
 
     const tenantId = req.user?.tenantId ?? 'default';
-    const results  = await mediaService.uploadMultiple(files, 'asset', tenantId, req.params.id);
+    const results  = await mediaService.uploadMultiple(files, 'asset', tenantId, req.params.id as string);
 
     const urls = results.map(r => r.secureUrl);
     await Asset.findOneAndUpdate({ _id: req.params.id, tenantId }, { $push: { images: { $each: urls } } });
@@ -90,7 +90,7 @@ export async function uploadExpenseReceipt(req: Request, res: Response, next: Ne
 
     const result = isPDF
       ? await mediaService.uploadDocument(file, 'expense', tenantId, `receipt-${req.params.id}`)
-      : await mediaService.uploadImage(file, 'expense', tenantId, { entityId: req.params.id });
+      : await mediaService.uploadImage(file, 'expense', tenantId, { entityId: req.params.id as string });
 
     await Expense.findOneAndUpdate(
       { _id: req.params.id, tenantId },

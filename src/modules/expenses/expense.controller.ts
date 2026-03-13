@@ -11,7 +11,7 @@ export async function getExpenses(req: Request, res: Response, next: NextFunctio
 
 export async function getExpenseById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const expense = await expenseService.getExpenseById(req.params.id, req.user?.tenantId ?? 'default');
+    const expense = await expenseService.getExpenseById(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Expense retrieved', data: { expense } });
   } catch (e) { next(e); }
 }
@@ -39,14 +39,14 @@ export async function createExpense(req: Request, res: Response, next: NextFunct
 
 export async function updateExpense(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const expense = await expenseService.updateExpense(req.params.id, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const expense = await expenseService.updateExpense(req.params.id as string, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Expense updated', data: { expense } });
   } catch (e) { next(e); }
 }
 
 export async function submitExpense(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const expense = await expenseService.submitExpense(req.params.id, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const expense = await expenseService.submitExpense(req.params.id as string, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Expense submitted for approval', data: { expense } });
   } catch (e) { next(e); }
 }
@@ -54,21 +54,21 @@ export async function submitExpense(req: Request, res: Response, next: NextFunct
 export async function reviewExpense(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { action, reviewNotes } = req.body;
-    const expense = await expenseService.reviewExpense(req.params.id, action, reviewNotes, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const expense = await expenseService.reviewExpense(req.params.id as string, action, reviewNotes, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: `Expense ${action}d`, data: { expense } });
   } catch (e) { next(e); }
 }
 
 export async function payExpense(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const expense = await expenseService.payExpense(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const expense = await expenseService.payExpense(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Expense marked as paid', data: { expense } });
   } catch (e) { next(e); }
 }
 
 export async function cancelExpense(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const expense = await expenseService.cancelExpense(req.params.id, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const expense = await expenseService.cancelExpense(req.params.id as string, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Expense cancelled', data: { expense } });
   } catch (e) { next(e); }
 }

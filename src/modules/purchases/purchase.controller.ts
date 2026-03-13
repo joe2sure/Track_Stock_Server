@@ -27,7 +27,7 @@ export async function getPOById(
 ): Promise<void> {
   try {
     const po = await purchaseService.getPOById(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, {
@@ -66,7 +66,7 @@ export async function updatePO(
 ): Promise<void> {
   try {
     const po = await purchaseService.updatePO(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
@@ -87,7 +87,7 @@ export async function sendPO(
 ): Promise<void> {
   try {
     const po = await purchaseService.sendPO(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
     );
@@ -107,7 +107,7 @@ export async function approvePO(
 ): Promise<void> {
   try {
     const po = await purchaseService.approvePO(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
     );
@@ -127,7 +127,7 @@ export async function cancelPO(
 ): Promise<void> {
   try {
     const po = await purchaseService.cancelPO(
-      req.params.id,
+      req.params.id as string,
       req.body.reason,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
@@ -148,7 +148,7 @@ export async function addPaymentToPO(
 ): Promise<void> {
   try {
     const po = await purchaseService.addPaymentToPO(
-      req.params.id,
+      req.params.id as string,
       req.body.payment,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
@@ -203,7 +203,7 @@ export async function getGRNById(
 ): Promise<void> {
   try {
     const grn = await purchaseService.getGRNById(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "GRN retrieved", data: { grn } });
@@ -277,7 +277,7 @@ export async function recordCreditNote(
 ): Promise<void> {
   try {
     const ret = await purchaseService.recordCreditNote(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
     );

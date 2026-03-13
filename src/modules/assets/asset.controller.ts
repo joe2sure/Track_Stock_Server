@@ -11,7 +11,7 @@ export async function getAssets(req: Request, res: Response, next: NextFunction)
 
 export async function getAssetById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const asset = await assetService.getAssetById(req.params.id, req.user?.tenantId ?? 'default');
+    const asset = await assetService.getAssetById(req.params.id as string , req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Asset retrieved', data: { asset } });
   } catch (e) { next(e); }
 }
@@ -39,42 +39,42 @@ export async function createAsset(req: Request, res: Response, next: NextFunctio
 
 export async function updateAsset(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const asset = await assetService.updateAsset(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const asset = await assetService.updateAsset(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Asset updated', data: { asset } });
   } catch (e) { next(e); }
 }
 
 export async function assignAsset(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const asset = await assetService.assignAsset(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const asset = await assetService.assignAsset(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Asset assigned', data: { asset } });
   } catch (e) { next(e); }
 }
 
 export async function unassignAsset(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const asset = await assetService.unassignAsset(req.params.id, req.user?.tenantId ?? 'default');
+    const asset = await assetService.unassignAsset(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Asset unassigned', data: { asset } });
   } catch (e) { next(e); }
 }
 
 export async function addMaintenance(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const asset = await assetService.addMaintenance(req.params.id, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
+    const asset = await assetService.addMaintenance(req.params.id as string, req.body, req.user?.tenantId ?? 'default', req.user?.userId ?? '');
     respond.success(res, { message: 'Maintenance record added', data: { asset } });
   } catch (e) { next(e); }
 }
 
 export async function disposeAsset(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const asset = await assetService.disposeAsset(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const asset = await assetService.disposeAsset(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Asset disposed', data: { asset } });
   } catch (e) { next(e); }
 }
 
 export async function updateAssetStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const asset = await assetService.updateAssetStatus(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const asset = await assetService.updateAssetStatus(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Asset status updated', data: { asset } });
   } catch (e) { next(e); }
 }

@@ -43,7 +43,7 @@ export async function getCategoryById(
 ): Promise<void> {
   try {
     const cat = await categoryService.getCategoryById(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, {
@@ -82,7 +82,7 @@ export async function updateCategory(
 ): Promise<void> {
   try {
     const cat = await categoryService.updateCategory(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
     );
@@ -102,7 +102,7 @@ export async function deleteCategory(
 ): Promise<void> {
   try {
     await categoryService.deleteCategory(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.noContent(res);

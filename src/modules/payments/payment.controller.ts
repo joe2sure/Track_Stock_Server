@@ -41,7 +41,7 @@ export async function initializePayment(req: Request, res: Response, next: NextF
 export async function verifyPayment(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const payment = await paystackService.verifyTransaction(
-      req.params.reference,
+      req.params.reference as string,
       req.user?.tenantId ?? 'default'
     );
     respond.success(res, { message: `Payment ${payment.status}`, data: { payment } });
@@ -51,7 +51,7 @@ export async function verifyPayment(req: Request, res: Response, next: NextFunct
 export async function getPayment(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const payment = await paystackService.getPayment(
-      req.params.reference,
+      req.params.reference as string,
       req.user?.tenantId ?? 'default'
     );
     respond.success(res, { message: 'Payment retrieved', data: { payment } });

@@ -26,7 +26,7 @@ export async function getSaleById(
 ): Promise<void> {
   try {
     const sale = await saleService.getSaleById(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "Sale retrieved", data: { sale } });
@@ -42,7 +42,7 @@ export async function getSaleByOrderNumber(
 ): Promise<void> {
   try {
     const sale = await saleService.getSaleByOrderNumber(
-      req.params.orderNumber,
+      req.params.orderNumber as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "Sale retrieved", data: { sale } });
@@ -78,7 +78,7 @@ export async function addPayment(
 ): Promise<void> {
   try {
     const sale = await saleService.addPayment(
-      req.params.id,
+      req.params.id as string,
       req.body.payment,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
@@ -96,7 +96,7 @@ export async function cancelSale(
 ): Promise<void> {
   try {
     const sale = await saleService.cancelSale(
-      req.params.id,
+      req.params.id as string,
       req.body.reason,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
@@ -114,7 +114,7 @@ export async function processReturn(
 ): Promise<void> {
   try {
     const sale = await saleService.processReturn(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
@@ -185,7 +185,7 @@ export async function getCustomerById(
 ): Promise<void> {
   try {
     const customer = await saleService.getCustomerById(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "Customer retrieved", data: { customer } });
@@ -218,7 +218,7 @@ export async function updateCustomer(
 ): Promise<void> {
   try {
     const customer = await saleService.updateCustomer(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
     );
@@ -236,7 +236,7 @@ export async function getCustomerSales(
   try {
     const limit = parseInt(String(req.query.limit ?? "20"), 10);
     const sales = await saleService.getCustomerSales(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
       limit,
     );
@@ -253,7 +253,7 @@ export async function adjustCustomerCredit(
 ): Promise<void> {
   try {
     const customer = await saleService.adjustCustomerCredit(
-      req.params.id,
+      req.params.id as string,
       req.body.amount,
       req.body.notes,
       req.user?.tenantId ?? "default",

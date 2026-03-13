@@ -11,7 +11,7 @@ export async function getBrands(req: Request, res: Response, next: NextFunction)
 
 export async function getBrandById(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const brand = await brandService.getBrandById(req.params.id, req.user?.tenantId ?? 'default');
+    const brand = await brandService.getBrandById(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Brand retrieved', data: { brand } });
   } catch (e) { next(e); }
 }
@@ -25,14 +25,14 @@ export async function createBrand(req: Request, res: Response, next: NextFunctio
 
 export async function updateBrand(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const brand = await brandService.updateBrand(req.params.id, req.body, req.user?.tenantId ?? 'default');
+    const brand = await brandService.updateBrand(req.params.id as string, req.body, req.user?.tenantId ?? 'default');
     respond.success(res, { message: 'Brand updated', data: { brand } });
   } catch (e) { next(e); }
 }
 
 export async function deleteBrand(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    await brandService.deleteBrand(req.params.id, req.user?.tenantId ?? 'default');
+    await brandService.deleteBrand(req.params.id as string, req.user?.tenantId ?? 'default');
     respond.noContent(res);
   } catch (e) { next(e); }
 }

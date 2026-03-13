@@ -184,7 +184,7 @@ export async function getProductByBarcode(
 ): Promise<void> {
   try {
     const product = await productService.getProductByBarcode(
-      req.params.barcode,
+      req.params.barcode as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "Product found", data: { product } });
@@ -207,7 +207,7 @@ export async function getProductBySku(
 ): Promise<void> {
   try {
     const product = await productService.getProductBySku(
-      req.params.sku,
+      req.params.sku as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "Product found", data: { product } });
@@ -232,7 +232,7 @@ export async function getProductById(
 ): Promise<void> {
   try {
     const product = await productService.getProductById(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "Product retrieved", data: { product } });
@@ -282,7 +282,7 @@ export async function updateProduct(
 ): Promise<void> {
   try {
     const product = await productService.updateProduct(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
@@ -310,7 +310,7 @@ export async function deleteProduct(
 ): Promise<void> {
   try {
     await productService.deleteProduct(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
     );
@@ -334,7 +334,7 @@ export async function duplicateProduct(
 ): Promise<void> {
   try {
     const product = await productService.duplicateProduct(
-      req.params.id,
+      req.params.id as string,
       req.user?.tenantId ?? "default",
       req.user?.userId ?? "",
     );
@@ -352,7 +352,7 @@ export async function addVariant(
 ): Promise<void> {
   try {
     const product = await productService.addVariant(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
     );
@@ -369,8 +369,8 @@ export async function updateVariant(
 ): Promise<void> {
   try {
     const product = await productService.updateVariant(
-      req.params.id,
-      req.params.variantId,
+      req.params.id as string,
+      req.params.variantId as string,
       req.body,
       req.user?.tenantId ?? "default",
     );
@@ -387,8 +387,8 @@ export async function deleteVariant(
 ): Promise<void> {
   try {
     const product = await productService.deleteVariant(
-      req.params.id,
-      req.params.variantId,
+      req.params.id as string,
+      req.params.variantId as string,
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "Variant deleted", data: { product } });
@@ -405,7 +405,7 @@ export async function addProductImage(
 ): Promise<void> {
   try {
     const product = await productService.addProductImage(
-      req.params.id,
+      req.params.id as string,
       req.body,
       req.user?.tenantId ?? "default",
     );
@@ -422,8 +422,8 @@ export async function removeProductImage(
 ): Promise<void> {
   try {
     const product = await productService.removeProductImage(
-      req.params.id,
-      parseInt(req.params.index, 10),
+      req.params.id as string,
+      parseInt(req.params.index as string, 10),
       req.user?.tenantId ?? "default",
     );
     respond.success(res, { message: "Image removed", data: { product } });
@@ -439,7 +439,7 @@ export async function setPrimaryImage(
 ): Promise<void> {
   try {
     const product = await productService.setPrimaryImage(
-      req.params.id,
+      req.params.id as string,
       parseInt(req.body.index, 10),
       req.user?.tenantId ?? "default",
     );
@@ -519,7 +519,7 @@ export async function adjustStock(
 ): Promise<void> {
   try {
     const product = await productService.adjustStock(
-      req.params.id,
+      req.params.id as string,
       req.body.adjustment,
       req.body.reason,
       req.user?.tenantId ?? "default",
