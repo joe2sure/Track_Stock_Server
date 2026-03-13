@@ -1,7 +1,9 @@
 import mongoose, { Types } from 'mongoose';
 import Staff, { IStaff } from './staff.model';
-import Attendance, { IAttendance, ILeaveRequest } from './attendance.model';
-import LeaveRequest from './attendance.model';
+// import Attendance, { IAttendance, ILeaveRequest } from './attendance.model';
+// import LeaveRequest from './attendance.model';
+
+import { Attendance, LeaveRequest, IAttendance, ILeaveRequest } from './attendance.model';
 import {
   parsePagination, buildPaginationMeta, buildSearchQuery, buildDateRangeQuery,
 } from '../../shared/utils/pagination';

@@ -12,6 +12,7 @@ import {
 } from "../../shared/utils/errors";
 import { PaginationQuery, PaginatedResult } from "../../shared/types";
 import slugify from "slugify";
+import { Types } from "mongoose";
 
 interface CreateCategoryInput {
   name: string;
@@ -20,6 +21,24 @@ interface CreateCategoryInput {
   parentId?: string;
   sortOrder?: number;
   isActive?: boolean;
+}
+
+// Define a type for category tree nodes (plain object version)
+interface CategoryTreeNode {
+  _id: Types.ObjectId;
+  name: string;
+  slug: string;
+  description?: string;
+  image?: string;
+  parentId?: Types.ObjectId;
+  tenantId: string;
+  isActive: boolean;
+  sortOrder: number;
+  productCount: number;
+  createdBy: Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+  children: CategoryTreeNode[];
 }
 
 export class CategoryService {
@@ -35,7 +54,7 @@ export class CategoryService {
       filter.isActive = query.isActive === "true";
     if (query.parentId === "null" || query.parentId === "root")
       filter.parentId = null;
-    else if (query.parentId) filter.parentId = query.parentId;
+    else if (query.parentId) filter.parentId = new Types.ObjectId(query.parentId);
 
     if (query.search)
       Object.assign(
@@ -49,18 +68,18 @@ export class CategoryService {
         .sort(sort)
         .skip(skip)
         .limit(limit)
-        .lean(),
+        .lean() as unknown as ICategory[],
       Category.countDocuments(filter),
     ]);
 
     return {
-      data: data as ICategory[],
+      data,
       pagination: buildPaginationMeta(total, page, limit),
     };
   }
 
   // ── Tree (hierarchical) ────────────────────────────────────────────────────
-  async getCategoryTree(tenantId: string): Promise<ICategory[]> {
+  async getCategoryTree(tenantId: string): Promise<CategoryTreeNode[]> {
     return getOrSet(
       `tree:${tenantId}`,
       async () => {
@@ -68,27 +87,44 @@ export class CategoryService {
           .sort({ sortOrder: 1, name: 1 })
           .lean();
 
-        const map = new Map<string, ICategory & { children: ICategory[] }>();
-        const roots: (ICategory & { children: ICategory[] })[] = [];
+        const map = new Map<string, CategoryTreeNode>();
+        const roots: CategoryTreeNode[] = [];
 
+        // First pass: create nodes with empty children arrays
         for (const cat of all) {
-          (cat as ICategory & { children: ICategory[] }).children = [];
-          map.set(
-            cat._id.toString(),
-            cat as ICategory & { children: ICategory[] },
-          );
+          const node: CategoryTreeNode = {
+            _id: cat._id,
+            name: cat.name,
+            slug: cat.slug,
+            description: cat.description,
+            image: cat.image,
+            parentId: cat.parentId,
+            tenantId: cat.tenantId,
+            isActive: cat.isActive,
+            sortOrder: cat.sortOrder,
+            productCount: cat.productCount,
+            createdBy: cat.createdBy,
+            createdAt: cat.createdAt,
+            updatedAt: cat.updatedAt,
+            children: []
+          };
+          map.set(cat._id.toString(), node);
         }
 
+        // Second pass: build the tree structure
         for (const cat of all) {
+          const node = map.get(cat._id.toString())!;
           if (cat.parentId) {
             const parent = map.get(cat.parentId.toString());
-            parent?.children.push(cat as ICategory);
+            if (parent) {
+              parent.children.push(node);
+            }
           } else {
-            roots.push(cat as ICategory & { children: ICategory[] });
+            roots.push(node);
           }
         }
 
-        return roots as unknown as ICategory[];
+        return roots;
       },
       { prefix: CachePrefix.CATEGORY, ttl: 600 },
     );
@@ -122,14 +158,22 @@ export class CategoryService {
       throw new ConflictError(`Category "${input.name}" already exists`);
 
     if (input.parentId) {
-      const parent = await Category.findOne({ _id: input.parentId, tenantId });
+      const parent = await Category.findOne({ 
+        _id: new Types.ObjectId(input.parentId), 
+        tenantId 
+      });
       if (!parent) throw new NotFoundError("Parent category");
     }
 
     const cat = await Category.create({
-      ...input,
+      name: input.name,
+      description: input.description,
+      image: input.image,
+      parentId: input.parentId ? new Types.ObjectId(input.parentId) : undefined, // Changed null to undefined
+      sortOrder: input.sortOrder ?? 0,
+      isActive: input.isActive ?? true,
       tenantId,
-      createdBy: userId,
+      createdBy: new Types.ObjectId(userId),
       slug,
     });
     await deleteCache(`tree:${tenantId}`, CachePrefix.CATEGORY);
@@ -145,7 +189,10 @@ export class CategoryService {
     const cat = await Category.findOne({ _id: id, tenantId });
     if (!cat) throw new NotFoundError("Category");
 
-    if (input.name && input.name !== cat.name) {
+    const updateData: Record<string, unknown> = {};
+
+    if (input.name !== undefined) {
+      updateData.name = input.name;
       const newSlug = slugify(input.name, { lower: true, strict: true });
       const conflict = await Category.findOne({
         slug: newSlug,
@@ -154,13 +201,31 @@ export class CategoryService {
       });
       if (conflict)
         throw new ConflictError(`Category "${input.name}" already exists`);
-      (input as Record<string, unknown>).slug = newSlug;
+      updateData.slug = newSlug;
     }
 
-    if (input.parentId === id)
-      throw new BadRequestError("Category cannot be its own parent");
+    if (input.description !== undefined) updateData.description = input.description;
+    if (input.image !== undefined) updateData.image = input.image;
+    if (input.sortOrder !== undefined) updateData.sortOrder = input.sortOrder;
+    if (input.isActive !== undefined) updateData.isActive = input.isActive;
 
-    const updated = await Category.findByIdAndUpdate(id, input, {
+    if (input.parentId !== undefined) {
+      if (input.parentId === id)
+        throw new BadRequestError("Category cannot be its own parent");
+      
+      if (input.parentId) {
+        const parent = await Category.findOne({ 
+          _id: new Types.ObjectId(input.parentId), 
+          tenantId 
+        });
+        if (!parent) throw new NotFoundError("Parent category");
+        updateData.parentId = new Types.ObjectId(input.parentId);
+      } else {
+        updateData.parentId = undefined; // Changed null to undefined
+      }
+    }
+
+    const updated = await Category.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
     });
@@ -197,7 +262,10 @@ export class CategoryService {
   ): Promise<void> {
     await Promise.all(
       items.map(({ id, sortOrder }) =>
-        Category.findOneAndUpdate({ _id: id, tenantId }, { sortOrder }),
+        Category.findOneAndUpdate(
+          { _id: new Types.ObjectId(id), tenantId }, 
+          { sortOrder }
+        ),
       ),
     );
     await deleteCache(`tree:${tenantId}`, CachePrefix.CATEGORY);
@@ -215,3 +283,222 @@ export class CategoryService {
 }
 
 export const categoryService = new CategoryService();
+
+
+// import Category, { ICategory } from "./category.model";
+// import {
+//   parsePagination,
+//   buildPaginationMeta,
+//   buildSearchQuery,
+// } from "../../shared/utils/pagination";
+// import { getOrSet, deleteCache, CachePrefix } from "../../shared/utils/cache";
+// import {
+//   NotFoundError,
+//   ConflictError,
+//   BadRequestError,
+// } from "../../shared/utils/errors";
+// import { PaginationQuery, PaginatedResult } from "../../shared/types";
+// import slugify from "slugify";
+
+// interface CreateCategoryInput {
+//   name: string;
+//   description?: string;
+//   image?: string;
+//   parentId?: string;
+//   sortOrder?: number;
+//   isActive?: boolean;
+// }
+
+// export class CategoryService {
+//   // ── List categories ────────────────────────────────────────────────────────
+//   async getCategories(
+//     query: PaginationQuery & { parentId?: string; isActive?: string },
+//     tenantId: string,
+//   ): Promise<PaginatedResult<ICategory>> {
+//     const { page, limit, skip, sort } = parsePagination(query, "sortOrder");
+
+//     const filter: Record<string, unknown> = { tenantId };
+//     if (query.isActive !== undefined)
+//       filter.isActive = query.isActive === "true";
+//     if (query.parentId === "null" || query.parentId === "root")
+//       filter.parentId = null;
+//     else if (query.parentId) filter.parentId = query.parentId;
+
+//     if (query.search)
+//       Object.assign(
+//         filter,
+//         buildSearchQuery(query.search, ["name", "description"]),
+//       );
+
+//     const [data, total] = await Promise.all([
+//       Category.find(filter)
+//         .populate("parentId", "name slug")
+//         .sort(sort)
+//         .skip(skip)
+//         .limit(limit)
+//         .lean(),
+//       Category.countDocuments(filter),
+//     ]);
+
+//     return {
+//       data: data as ICategory[],
+//       pagination: buildPaginationMeta(total, page, limit),
+//     };
+//   }
+
+//   // ── Tree (hierarchical) ────────────────────────────────────────────────────
+//   async getCategoryTree(tenantId: string): Promise<ICategory[]> {
+//     return getOrSet(
+//       `tree:${tenantId}`,
+//       async () => {
+//         const all = await Category.find({ tenantId, isActive: true })
+//           .sort({ sortOrder: 1, name: 1 })
+//           .lean();
+
+//         const map = new Map<string, ICategory & { children: ICategory[] }>();
+//         const roots: (ICategory & { children: ICategory[] })[] = [];
+
+//         for (const cat of all) {
+//           (cat as ICategory & { children: ICategory[] }).children = [];
+//           map.set(
+//             cat._id.toString(),
+//             cat as ICategory & { children: ICategory[] },
+//           );
+//         }
+
+//         for (const cat of all) {
+//           if (cat.parentId) {
+//             const parent = map.get(cat.parentId.toString());
+//             parent?.children.push(cat as ICategory);
+//           } else {
+//             roots.push(cat as ICategory & { children: ICategory[] });
+//           }
+//         }
+
+//         return roots as unknown as ICategory[];
+//       },
+//       { prefix: CachePrefix.CATEGORY, ttl: 600 },
+//     );
+//   }
+
+//   // ── Get one ────────────────────────────────────────────────────────────────
+//   async getCategoryById(id: string, tenantId: string): Promise<ICategory> {
+//     const cat = await Category.findOne({ _id: id, tenantId }).populate(
+//       "parentId",
+//       "name slug",
+//     );
+//     if (!cat) throw new NotFoundError("Category");
+//     return cat;
+//   }
+
+//   async getCategoryBySlug(slug: string, tenantId: string): Promise<ICategory> {
+//     const cat = await Category.findOne({ slug, tenantId });
+//     if (!cat) throw new NotFoundError("Category");
+//     return cat;
+//   }
+
+//   // ── Create ─────────────────────────────────────────────────────────────────
+//   async createCategory(
+//     input: CreateCategoryInput,
+//     tenantId: string,
+//     userId: string,
+//   ): Promise<ICategory> {
+//     const slug = slugify(input.name, { lower: true, strict: true });
+//     const exists = await Category.findOne({ slug, tenantId });
+//     if (exists)
+//       throw new ConflictError(`Category "${input.name}" already exists`);
+
+//     if (input.parentId) {
+//       const parent = await Category.findOne({ _id: input.parentId, tenantId });
+//       if (!parent) throw new NotFoundError("Parent category");
+//     }
+
+//     const cat = await Category.create({
+//       ...input,
+//       tenantId,
+//       createdBy: userId,
+//       slug,
+//     });
+//     await deleteCache(`tree:${tenantId}`, CachePrefix.CATEGORY);
+//     return cat;
+//   }
+
+//   // ── Update ─────────────────────────────────────────────────────────────────
+//   async updateCategory(
+//     id: string,
+//     input: Partial<CreateCategoryInput>,
+//     tenantId: string,
+//   ): Promise<ICategory> {
+//     const cat = await Category.findOne({ _id: id, tenantId });
+//     if (!cat) throw new NotFoundError("Category");
+
+//     if (input.name && input.name !== cat.name) {
+//       const newSlug = slugify(input.name, { lower: true, strict: true });
+//       const conflict = await Category.findOne({
+//         slug: newSlug,
+//         tenantId,
+//         _id: { $ne: id },
+//       });
+//       if (conflict)
+//         throw new ConflictError(`Category "${input.name}" already exists`);
+//       (input as Record<string, unknown>).slug = newSlug;
+//     }
+
+//     if (input.parentId === id)
+//       throw new BadRequestError("Category cannot be its own parent");
+
+//     const updated = await Category.findByIdAndUpdate(id, input, {
+//       new: true,
+//       runValidators: true,
+//     });
+//     if (!updated) throw new NotFoundError("Category");
+
+//     await deleteCache(`tree:${tenantId}`, CachePrefix.CATEGORY);
+//     return updated;
+//   }
+
+//   // ── Delete ─────────────────────────────────────────────────────────────────
+//   async deleteCategory(id: string, tenantId: string): Promise<void> {
+//     const cat = await Category.findOne({ _id: id, tenantId });
+//     if (!cat) throw new NotFoundError("Category");
+
+//     if (cat.productCount > 0)
+//       throw new BadRequestError(
+//         `Cannot delete: category has ${cat.productCount} product(s). Reassign them first.`,
+//       );
+
+//     const children = await Category.countDocuments({ parentId: id, tenantId });
+//     if (children > 0)
+//       throw new BadRequestError(
+//         `Cannot delete: category has ${children} sub-categor${children > 1 ? "ies" : "y"}. Delete them first.`,
+//       );
+
+//     await Category.findByIdAndDelete(id);
+//     await deleteCache(`tree:${tenantId}`, CachePrefix.CATEGORY);
+//   }
+
+//   // ── Reorder ────────────────────────────────────────────────────────────────
+//   async reorderCategories(
+//     items: { id: string; sortOrder: number }[],
+//     tenantId: string,
+//   ): Promise<void> {
+//     await Promise.all(
+//       items.map(({ id, sortOrder }) =>
+//         Category.findOneAndUpdate({ _id: id, tenantId }, { sortOrder }),
+//       ),
+//     );
+//     await deleteCache(`tree:${tenantId}`, CachePrefix.CATEGORY);
+//   }
+
+//   // ── Stats ──────────────────────────────────────────────────────────────────
+//   async getCategoryStats(tenantId: string) {
+//     const [total, active, withProducts] = await Promise.all([
+//       Category.countDocuments({ tenantId }),
+//       Category.countDocuments({ tenantId, isActive: true }),
+//       Category.countDocuments({ tenantId, productCount: { $gt: 0 } }),
+//     ]);
+//     return { total, active, inactive: total - active, withProducts };
+//   }
+// }
+
+// export const categoryService = new CategoryService();

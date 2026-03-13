@@ -44,8 +44,7 @@ const attendanceSchema = new Schema<IAttendance>(
 attendanceSchema.index({ staffId: 1, date: 1, tenantId: 1 }, { unique: true });
 attendanceSchema.index({ date: -1, tenantId: 1 });
 
-const Attendance = mongoose.model<IAttendance>('Attendance', attendanceSchema);
-export default Attendance;
+export const Attendance = mongoose.model<IAttendance>('Attendance', attendanceSchema);
 
 // ── Leave request ────────────────────────────────────────────────────────────
 export interface ILeaveRequest extends Document {
@@ -95,5 +94,4 @@ const leaveRequestSchema = new Schema<ILeaveRequest>(
 
 leaveRequestSchema.index({ staffId: 1, startDate: -1 });
 
-const LeaveRequest = mongoose.model<ILeaveRequest>('LeaveRequest', leaveRequestSchema);
-export default LeaveRequest;
+export const LeaveRequest = mongoose.model<ILeaveRequest>('LeaveRequest', leaveRequestSchema);

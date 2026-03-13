@@ -209,7 +209,7 @@ const userSchema = new Schema<IUser>(
     timestamps: true,
     toJSON: {
       virtuals: true,
-      transform: function (_doc, ret) {
+      transform: function (_doc: any, ret: Record<string, any>) {
         delete ret.password;
         delete ret.pin;
         delete ret.refreshTokens;
