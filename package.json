@@ -9,7 +9,7 @@
     "start": "node dist/server.js",
     "lint": "eslint . --ext .ts",
     "test": "jest --coverage",
-    "seed": "ts-node src/scripts/seed.ts"
+    "seed": "npx ts-node src/scripts/seed.ts"
   },
   "keywords": [],
   "author": "",

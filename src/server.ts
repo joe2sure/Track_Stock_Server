@@ -139,9 +139,24 @@ function setupGracefulShutdown(): void {
   });
 
   // Handle uncaught exceptions
-  process.on('uncaughtException', (error: Error) => {
-    logger.error(`Uncaught Exception: ${error.message}`, { stack: error.stack });
-    void shutdown('uncaughtException');
+  // Only shut down for truly unrecoverable system errors (e.g. out of memory).
+  // Transient errors like "Cannot set headers after they are sent" are logged
+  // and ignored — shutting down for them would cause nodemon restart loops.
+  const FATAL_CODES = new Set(['ENOMEM', 'EADDRINUSE', 'MODULE_NOT_FOUND']);
+  process.on('uncaughtException', (error: Error & { code?: string }) => {
+    logger.error(`Uncaught Exception: ${error.message}`, { stack: error.stack, code: error.code });
+
+    const isFatal =
+      FATAL_CODES.has(error.code ?? '') ||
+      error.message.includes('out of memory') ||
+      error.message.includes('Maximum call stack');
+
+    if (isFatal || env.NODE_ENV === 'production') {
+      logger.error('Fatal uncaught exception — initiating graceful shutdown');
+      void shutdown('uncaughtException');
+    } else {
+      logger.warn('Non-fatal uncaught exception — server continuing (development mode)');
+    }
   });
 }
 
@@ -190,6 +205,7 @@ export { io };
 // import { Server as SocketIOServer } from 'socket.io';
 // import createApp from './app';
 // import { connectDB } from './config/database';
+// import { initRedis } from './shared/utils/cache';
 // import env from './config/env';
 // import logger from './config/logger';
 
@@ -199,6 +215,9 @@ export { io };
 // async function bootstrap(): Promise<void> {
 //   // 1. Connect to database
 //   await connectDB();
+
+//   // 2. Connect to Redis (or fall back to in-memory cache)
+//   await initRedis();
 
 //   // 2. Create Express app
 //   const app = createApp();
@@ -264,7 +283,11 @@ export { io };
 //   // Export io for use in other modules
 //   setSocketIO(io);
 
-//   // 5. Start listening
+//   // 5. Start scheduler (cron jobs)
+//   const { startScheduler } = await import('./modules/notifications/scheduler');
+//   startScheduler();
+
+//   // 6. Start listening
 //   server.listen(env.PORT, () => {
 //     logger.info(`
 // ╔══════════════════════════════════════════════════════════╗
