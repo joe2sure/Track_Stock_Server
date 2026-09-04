@@ -327,3 +327,6 @@ npm run format   # Prettier
 ---
 
 *Built with ❤️ for TrackStock Supermarket & Hotel, Enugu, Nigeria*
+
+
+Tokens now last 8 hours during development so you won't hit expiry mid-testing. When you go to production, set JWT_ACCESS_EXPIRES_IN=15m back for security.
